@@ -1,0 +1,30 @@
+node_modules/
+dist/
+.expo/
+.turbo/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Prisma
+apps/api/generated/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Expo
+apps/mobile/android/
+apps/mobile/ios/
+
+# Redis dump
+dump.rdb
+
+.claude/

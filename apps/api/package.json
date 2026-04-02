@@ -1,0 +1,33 @@
+{
+  "name": "@clearmoney/api",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint src/",
+    "migrate": "prisma migrate dev",
+    "generate": "prisma generate",
+    "studio": "prisma studio",
+    "db:push": "prisma db push"
+  },
+  "dependencies": {
+    "@clearmoney/shared": "*",
+    "fastify": "^5.2",
+    "@fastify/cors": "^11.0",
+    "fastify-plugin": "^5.0",
+    "@supabase/supabase-js": "^2.49",
+    "@prisma/client": "^6.6",
+    "bullmq": "^5.40",
+    "ioredis": "^5.6",
+    "zod": "^3.24"
+  },
+  "devDependencies": {
+    "prisma": "^6.6",
+    "tsx": "^4.19",
+    "typescript": "^5.7",
+    "@types/node": "^22"
+  }
+}

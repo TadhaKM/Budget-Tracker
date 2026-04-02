@@ -1,0 +1,28 @@
+{
+  "name": "clearmoney",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "db:migrate": "npm run migrate --workspace=apps/api",
+    "db:generate": "npm run generate --workspace=apps/api",
+    "db:studio": "npm run studio --workspace=apps/api"
+  },
+  "devDependencies": {
+    "turbo": "^2.4",
+    "prettier": "^3.5",
+    "eslint": "^9.0",
+    "typescript": "^5.7"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "npm@11.11.0"
+}
