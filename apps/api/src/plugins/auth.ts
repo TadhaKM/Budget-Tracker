@@ -28,6 +28,16 @@ export const authPlugin = fp(async (app: FastifyInstance) => {
       return reply.code(401).send({ error: 'Invalid token' });
     }
 
-    request.userId = data.user.id;
+    // Look up our internal user ID from the Supabase ID
+    const user = await app.prisma.user.findUnique({
+      where: { supabaseId: data.user.id },
+      select: { id: true, deletedAt: true },
+    });
+
+    if (!user || user.deletedAt) {
+      return reply.code(401).send({ error: 'User not found' });
+    }
+
+    request.userId = user.id;
   });
 });

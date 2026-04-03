@@ -4,17 +4,20 @@ import { TransactionListRequestSchema } from '@clearmoney/shared';
 export async function transactionRoutes(app: FastifyInstance) {
   app.addHook('preHandler', app.authenticate);
 
-  // GET /transactions — paginated, filterable transaction list
+  // GET /transactions — paginated, filterable transaction feed
   app.get('/', async (request) => {
     const params = TransactionListRequestSchema.parse(request.query);
 
     const transactions = await app.prisma.transaction.findMany({
       where: {
-        account: { userId: request.userId },
+        userId: request.userId,
         ...(params.accountId && { accountId: params.accountId }),
-        ...(params.category && { category: params.category }),
+        ...(params.categoryId && { categoryId: params.categoryId }),
       },
-      orderBy: { timestamp: 'desc' },
+      include: {
+        merchant: true,
+      },
+      orderBy: { bookedAt: 'desc' },
       take: params.limit,
     });
 
@@ -24,12 +27,30 @@ export async function transactionRoutes(app: FastifyInstance) {
   // PATCH /transactions/:id/category — re-categorise a transaction
   app.patch('/:id/category', async (request) => {
     const { id } = request.params as { id: string };
-    const { category } = request.body as { category: string };
+    const { categoryId } = request.body as { categoryId: string };
 
     const transaction = await app.prisma.transaction.update({
       where: { id },
-      data: { category },
+      data: { categoryId },
     });
+
+    // If merchant is known, create/update a merchant override for this user
+    if (transaction.merchantId) {
+      await app.prisma.merchantOverride.upsert({
+        where: {
+          userId_merchantId: {
+            userId: request.userId,
+            merchantId: transaction.merchantId,
+          },
+        },
+        create: {
+          userId: request.userId,
+          merchantId: transaction.merchantId,
+          categoryId,
+        },
+        update: { categoryId },
+      });
+    }
 
     return transaction;
   });
