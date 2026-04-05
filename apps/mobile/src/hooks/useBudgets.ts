@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { apiFetch } from '@/lib/api';
+import { budgetsApi } from '@/lib/api';
 import { useBudgetsStore } from '@/stores/budgets';
-import type { Budget } from '@clearmoney/shared';
+import type { BudgetData } from '@/components/finance/BudgetProgressBar';
 
 export function useBudgets() {
   const setBudgets = useBudgetsStore((s) => s.setBudgets);
@@ -9,9 +9,10 @@ export function useBudgets() {
   return useQuery({
     queryKey: ['budgets'],
     queryFn: async () => {
-      const data = await apiFetch<{ budgets: Budget[] }>('/budgets');
-      setBudgets(data.budgets);
-      return data.budgets;
+      const res = await budgetsApi.list();
+      const budgets = res.data as BudgetData[];
+      setBudgets(budgets);
+      return budgets;
     },
   });
 }

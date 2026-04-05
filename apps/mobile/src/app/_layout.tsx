@@ -9,11 +9,64 @@ export default function RootLayout() {
     <QueryProvider>
       <AuthProvider>
         <StatusBar style="light" />
-        <Stack screenOptions={{ headerShown: false }}>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: '#0F172A' },
+          }}
+        >
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="(auth)" />
-          <Stack.Screen name="account/[id]" options={{ presentation: 'card' }} />
-          <Stack.Screen name="transaction/[id]" options={{ presentation: 'modal' }} />
+          <Stack.Screen
+            name="analytics"
+            options={{
+              headerShown: true,
+              headerTitle: 'Analytics',
+              headerStyle: { backgroundColor: '#0F172A' },
+              headerTintColor: '#f8fafc',
+              presentation: 'card',
+            }}
+          />
+          <Stack.Screen
+            name="account/[id]"
+            options={{
+              headerShown: true,
+              headerTitle: 'Account',
+              headerStyle: { backgroundColor: '#0F172A' },
+              headerTintColor: '#f8fafc',
+              presentation: 'card',
+            }}
+          />
+          <Stack.Screen
+            name="transaction/[id]"
+            options={{
+              headerShown: true,
+              headerTitle: 'Transaction',
+              headerStyle: { backgroundColor: '#0F172A' },
+              headerTintColor: '#f8fafc',
+              presentation: 'modal',
+            }}
+          />
+          <Stack.Screen
+            name="budget/create"
+            options={{
+              headerShown: true,
+              headerTitle: 'New Budget',
+              headerStyle: { backgroundColor: '#0F172A' },
+              headerTintColor: '#f8fafc',
+              presentation: 'modal',
+            }}
+          />
+          <Stack.Screen
+            name="budget/[id]"
+            options={{
+              headerShown: true,
+              headerTitle: 'Budget',
+              headerStyle: { backgroundColor: '#0F172A' },
+              headerTintColor: '#f8fafc',
+              presentation: 'card',
+            }}
+          />
         </Stack>
       </AuthProvider>
     </QueryProvider>

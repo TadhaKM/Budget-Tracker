@@ -1,9 +1,9 @@
 import { create } from 'zustand';
-import type { Budget } from '@clearmoney/shared';
+import type { BudgetData } from '@/components/finance/BudgetProgressBar';
 
 interface BudgetsState {
-  budgets: Budget[];
-  setBudgets: (budgets: Budget[]) => void;
+  budgets: BudgetData[];
+  setBudgets: (budgets: BudgetData[]) => void;
 }
 
 export const useBudgetsStore = create<BudgetsState>((set) => ({

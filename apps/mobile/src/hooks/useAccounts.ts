@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { apiFetch } from '@/lib/api';
+import { accountsApi } from '@/lib/api';
 import { useAccountsStore } from '@/stores/accounts';
-import type { AccountListResponse } from '@clearmoney/shared';
+import type { AccountData } from '@/components/finance/AccountCard';
 
 export function useAccounts() {
   const setAccounts = useAccountsStore((s) => s.setAccounts);
@@ -9,9 +9,10 @@ export function useAccounts() {
   return useQuery({
     queryKey: ['accounts'],
     queryFn: async () => {
-      const data = await apiFetch<AccountListResponse>('/accounts');
-      setAccounts(data.accounts);
-      return data.accounts;
+      const res = await accountsApi.list();
+      const accounts = res.data as AccountData[];
+      setAccounts(accounts);
+      return accounts;
     },
   });
 }

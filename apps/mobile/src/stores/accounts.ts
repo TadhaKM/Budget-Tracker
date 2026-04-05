@@ -1,10 +1,10 @@
 import { create } from 'zustand';
-import type { AccountWithBalance } from '@clearmoney/shared';
+import type { AccountData } from '@/components/finance/AccountCard';
 
 interface AccountsState {
-  accounts: AccountWithBalance[];
+  accounts: AccountData[];
   selectedAccountId: string | null;
-  setAccounts: (accounts: AccountWithBalance[]) => void;
+  setAccounts: (accounts: AccountData[]) => void;
   selectAccount: (id: string | null) => void;
   totalBalance: () => number;
 }
@@ -14,6 +14,5 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
   selectedAccountId: null,
   setAccounts: (accounts) => set({ accounts }),
   selectAccount: (id) => set({ selectedAccountId: id }),
-  totalBalance: () =>
-    get().accounts.reduce((sum, a) => sum + (a.balance?.current ?? 0), 0),
+  totalBalance: () => get().accounts.reduce((sum, a) => sum + a.balance, 0),
 }));

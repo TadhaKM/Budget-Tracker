@@ -1,21 +1,18 @@
-import { useQuery } from '@tanstack/react-query';
-import { apiFetch } from '@/lib/api';
-import { useTransactionsStore } from '@/stores/transactions';
-import type { TransactionListResponse, TransactionCategory } from '@clearmoney/shared';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { transactionsApi, type TransactionFilters } from '@/lib/api';
+import type { TransactionRowData } from '@/components/finance/TransactionRow';
 
-export function useTransactions(category?: TransactionCategory | null) {
-  const setTransactions = useTransactionsStore((s) => s.setTransactions);
-
-  const params = new URLSearchParams();
-  if (category) params.set('category', category);
-
-  return useQuery({
-    queryKey: ['transactions', category ?? 'all'],
-    queryFn: async () => {
-      const query = params.toString() ? `?${params}` : '';
-      const data = await apiFetch<TransactionListResponse>(`/transactions${query}`);
-      setTransactions(data.transactions);
-      return data;
+export function useTransactions(filters?: Omit<TransactionFilters, 'cursor'>) {
+  return useInfiniteQuery({
+    queryKey: ['transactions', filters],
+    queryFn: async ({ pageParam }) => {
+      const res = await transactionsApi.list({ ...filters, cursor: pageParam });
+      return {
+        transactions: res.data as TransactionRowData[],
+        nextCursor: res.nextCursor,
+      };
     },
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
 }
