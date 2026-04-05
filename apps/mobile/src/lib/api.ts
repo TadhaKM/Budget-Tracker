@@ -211,10 +211,43 @@ export const insightsApi = {
 
 // ── Connections ─────────────────────────────────────────────────
 
+export interface ConnectionResponse {
+  id: string;
+  institution: { id: string; name: string; logoUrl: string | null };
+  consentStatus: 'PENDING' | 'ACTIVE' | 'EXPIRED' | 'REVOKED' | 'FAILED';
+  consentExpiresAt: string;
+  lastSyncedAt: string | null;
+  accountCount: number;
+  createdAt: string;
+}
+
+export interface ConnectionDetailResponse extends Omit<ConnectionResponse, 'institution' | 'accountCount'> {
+  institution: { id: string; name: string; logoUrl: string | null; countryCode: string };
+  accounts: Array<{
+    id: string;
+    externalAccountId: string;
+    accountType: string;
+    displayName: string;
+    currency: string;
+    balance: { current: string; available: string | null; fetchedAt: string } | null;
+  }>;
+}
+
+export interface LinkSessionResponse {
+  authUrl: string;
+  state: string;
+  connectionId: string;
+  expiresIn: number;
+}
+
 export const connectionsApi = {
-  list: () => get<{ data: unknown[] }>('/connections'),
-  create: (institutionId: string) => post<{ data: { authUrl: string } }>('/connections', { institutionId }),
-  delete: (id: string) => del(`/connections/${id}`),
+  list: () => get<{ data: ConnectionResponse[] }>('/connections'),
+  get: (id: string) => get<{ data: ConnectionDetailResponse }>(`/connections/${id}`),
+  create: (institutionId: string) =>
+    post<{ data: LinkSessionResponse }>('/connections', { institutionId }),
+  delete: (id: string) => del<{ data: { success: boolean } }>(`/connections/${id}`),
+  refresh: (id: string) =>
+    post<{ data: { authUrl: string; state: string; expiresIn: number } }>(`/connections/${id}/refresh`),
 };
 
 // ── Institutions ────────────────────────────────────────────────
