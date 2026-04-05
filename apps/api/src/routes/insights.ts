@@ -1,83 +1,56 @@
 import type { FastifyInstance } from 'fastify';
+import { CursorPaginationRequestSchema } from '@clearmoney/shared';
+import { notFound } from '../lib/errors.js';
 
 export async function insightRoutes(app: FastifyInstance) {
   app.addHook('preHandler', app.authenticate);
 
-  // GET /insights/weekly — current and recent weekly summaries
-  app.get('/weekly', async (request) => {
-    const summaries = await app.prisma.weeklySummary.findMany({
-      where: { userId: request.userId },
-      orderBy: { weekStart: 'desc' },
-      take: 12,
-    });
-    return { summaries };
-  });
+  // GET /insights — paginated insight cards for home screen
+  app.get('/', async (request) => {
+    const params = CursorPaginationRequestSchema.parse(request.query);
+    const take = params.limit;
 
-  // GET /insights/cards — unread insight cards for home screen
-  app.get('/cards', async (request) => {
     const insights = await app.prisma.insight.findMany({
-      where: { userId: request.userId, isRead: false },
-      orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
-      take: 5,
+      where: { userId: request.userId },
+      orderBy: [{ isRead: 'asc' }, { priority: 'desc' }, { createdAt: 'desc' }],
+      take: take + 1,
+      ...(params.cursor && { cursor: { id: params.cursor }, skip: 1 }),
     });
-    return { insights };
+
+    const hasMore = insights.length > take;
+    const data = hasMore ? insights.slice(0, take) : insights;
+
+    return {
+      data,
+      pagination: {
+        nextCursor: hasMore ? data[data.length - 1].id : null,
+        hasMore,
+      },
+    };
   });
 
-  // PATCH /insights/:id/read — mark an insight as read
+  // PATCH /insights/:id/read — mark a single insight as read
   app.patch('/:id/read', async (request) => {
     const { id } = request.params as { id: string };
+
+    const insight = await app.prisma.insight.findUnique({ where: { id } });
+    if (!insight || insight.userId !== request.userId) throw notFound('Insight not found');
+
     await app.prisma.insight.update({
       where: { id },
       data: { isRead: true },
     });
+
     return { success: true };
   });
 
-  // GET /insights/recurring — active recurring payments
-  app.get('/recurring', async (request) => {
-    const recurring = await app.prisma.recurringPayment.findMany({
-      where: {
-        userId: request.userId,
-        isActive: true,
-        isDismissed: false,
-      },
-      orderBy: { averageAmount: 'desc' },
+  // POST /insights/read-all — mark all insights as read
+  app.post('/read-all', async (request) => {
+    const { count } = await app.prisma.insight.updateMany({
+      where: { userId: request.userId, isRead: false },
+      data: { isRead: true },
     });
 
-    const monthlyTotal = recurring
-      .filter((r) => r.frequency === 'MONTHLY')
-      .reduce((sum, r) => sum + Number(r.averageAmount), 0);
-
-    return { recurring, monthlyTotal };
-  });
-
-  // PATCH /insights/recurring/:id/dismiss — dismiss a false positive
-  app.patch('/recurring/:id/dismiss', async (request) => {
-    const { id } = request.params as { id: string };
-    await app.prisma.recurringPayment.update({
-      where: { id },
-      data: { isDismissed: true },
-    });
-    return { success: true };
-  });
-
-  // GET /insights/sync-status — latest sync info
-  app.get('/sync-status', async (request) => {
-    const latestJobs = await app.prisma.syncJob.findMany({
-      where: { userId: request.userId },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-    });
-    return { syncJobs: latestJobs };
-  });
-
-  // GET /insights/notifications — notification history
-  app.get('/notifications', async (request) => {
-    const notifications = await app.prisma.notification.findMany({
-      where: { userId: request.userId },
-      orderBy: { createdAt: 'desc' },
-      take: 20,
-    });
-    return { notifications };
+    return { updated: count };
   });
 }

@@ -1,9 +1,12 @@
 // Schemas (for runtime validation)
+export * from './schemas/common.js';
 export * from './schemas/auth.js';
+export * from './schemas/user.js';
 export * from './schemas/accounts.js';
 export * from './schemas/transactions.js';
 export * from './schemas/budgets.js';
 export * from './schemas/insights.js';
+export * from './schemas/notifications.js';
 
 // Constants
 export * from './constants/categories.js';

@@ -1,4 +1,12 @@
+export type {
+  ErrorDetail,
+  ErrorResponse,
+  Pagination,
+  CursorPaginationRequest,
+  DateRangeRequest,
+} from '../schemas/common.js';
 export type { MagicLinkRequest, TokenResponse } from '../schemas/auth.js';
+export type { RegisterUser, UpdateUser, UserProfile } from '../schemas/user.js';
 export type {
   Institution,
   Account,
@@ -21,5 +29,9 @@ export type {
   SyncJob,
   Notification,
 } from '../schemas/insights.js';
+export type {
+  NotificationSettings,
+  UpdateNotificationSettings,
+} from '../schemas/notifications.js';
 export type { TransactionCategory } from '../constants/categories.js';
 export type { BudgetPeriod, RecurringFrequency } from '../constants/periods.js';

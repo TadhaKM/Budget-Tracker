@@ -12,6 +12,7 @@ const envSchema = z.object({
   TRUELAYER_CLIENT_SECRET: z.string().min(1),
   TRUELAYER_REDIRECT_URI: z.string().url(),
   TRUELAYER_ENV: z.enum(['sandbox', 'live']).default('sandbox'),
+  TRUELAYER_WEBHOOK_SECRET: z.string().min(1),
   REDIS_URL: z.string().default('redis://localhost:6379'),
   TOKEN_ENCRYPTION_KEY: z.string().min(32),
 });
