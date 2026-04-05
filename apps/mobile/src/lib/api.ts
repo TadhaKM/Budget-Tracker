@@ -82,6 +82,36 @@ export const healthApi = {
   check: () => request<{ status: string }>(`${API_BASE}/health`),
 };
 
+// ── Auth ────────────────────────────────────────────────────────
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  displayName: string | null;
+  timezone: string;
+  currency: string;
+  onboardedAt: string | null;
+  stats: { connectedBanks: number; totalAccounts: number; transactionCount: number };
+}
+
+export const authApi = {
+  /** Create internal user on first sign-in. 409 = already registered (safe to ignore). */
+  register: (body?: { displayName?: string; timezone?: string; currency?: string }) =>
+    post<{ data: UserProfile }>('/auth/register', body ?? {}),
+
+  me: () => get<{ data: UserProfile }>('/auth/me'),
+
+  updateProfile: (body: { displayName?: string; timezone?: string; currency?: string }) =>
+    patch<{ data: UserProfile }>('/auth/me', body),
+
+  deleteAccount: () => del<{ data: { message: string } }>('/auth/me'),
+
+  onboardingStatus: () =>
+    get<{ data: { isComplete: boolean; steps: { accountCreated: boolean; bankConnected: boolean; firstSyncComplete: boolean } } }>('/auth/onboarding'),
+
+  completeOnboarding: () => post<{ data: { success: boolean } }>('/auth/onboarding/complete'),
+};
+
 // ── Accounts ────────────────────────────────────────────────────
 
 export const accountsApi = {
