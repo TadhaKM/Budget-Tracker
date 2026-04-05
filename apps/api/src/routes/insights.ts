@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { CursorPaginationRequestSchema } from '@clearmoney/shared';
 import { notFound } from '../lib/errors.js';
+import { parseIdParam } from '../lib/params.js';
 
 export async function insightRoutes(app: FastifyInstance) {
   app.addHook('preHandler', app.authenticate);
@@ -31,7 +32,7 @@ export async function insightRoutes(app: FastifyInstance) {
 
   // PATCH /insights/:id/read — mark a single insight as read
   app.patch('/:id/read', async (request) => {
-    const { id } = request.params as { id: string };
+    const { id } = parseIdParam(request.params);
 
     const insight = await app.prisma.insight.findUnique({ where: { id } });
     if (!insight || insight.userId !== request.userId) throw notFound('Insight not found');

@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { AppError } from '../lib/errors.js';
+import { parseIdParam } from '../lib/params.js';
 
 export async function recurringRoutes(app: FastifyInstance) {
   app.addHook('preHandler', app.authenticate);
@@ -47,7 +48,7 @@ export async function recurringRoutes(app: FastifyInstance) {
 
   // GET /recurring/:id — detail
   app.get('/:id', async (request) => {
-    const { id } = request.params as { id: string };
+    const { id } = parseIdParam(request.params);
     const recurring = await app.prisma.recurringPayment.findFirst({
       where: { id, userId: request.userId },
       include: { merchant: true },
@@ -58,7 +59,7 @@ export async function recurringRoutes(app: FastifyInstance) {
 
   // PATCH /recurring/:id/dismiss — dismiss a false positive
   app.patch('/:id/dismiss', async (request) => {
-    const { id } = request.params as { id: string };
+    const { id } = parseIdParam(request.params);
     const recurring = await app.prisma.recurringPayment.findFirst({
       where: { id, userId: request.userId },
     });

@@ -6,6 +6,7 @@ import { authPlugin } from './plugins/auth.js';
 import { errorHandlerPlugin } from './plugins/error-handler.js';
 import { requestIdPlugin } from './plugins/request-id.js';
 import { rateLimitPlugin } from './plugins/rate-limit.js';
+import { securityHeadersPlugin } from './plugins/security-headers.js';
 import { healthRoutes } from './routes/health.js';
 import { webhookRoutes } from './routes/webhooks.js';
 import { connectionCallbackRoutes } from './routes/connections.js';
@@ -42,8 +43,17 @@ export async function buildApp() {
   });
 
   // ── Infrastructure plugins ────────────────────────────────────
-  await app.register(cors, { origin: true });
+  const allowedOrigins = env.NODE_ENV === 'production'
+    ? [
+        // Add your production domains here
+        'https://clearmoney.app',
+        'clearmoney://', // deep link scheme
+      ]
+    : true; // allow all in development
+
+  await app.register(cors, { origin: allowedOrigins });
   await app.register(requestIdPlugin);
+  await app.register(securityHeadersPlugin);
   await app.register(prismaPlugin);
   await app.register(authPlugin);
   await app.register(rateLimitPlugin);

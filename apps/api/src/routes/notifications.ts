@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { UpdateNotificationSettingsSchema } from '@clearmoney/shared';
 import { AppError } from '../lib/errors.js';
+import { parseIdParam } from '../lib/params.js';
 
 export async function notificationRoutes(app: FastifyInstance) {
   app.addHook('preHandler', app.authenticate);
@@ -44,7 +45,7 @@ export async function notificationRoutes(app: FastifyInstance) {
 
   // PATCH /notifications/:id/read — mark one as read
   app.patch('/:id/read', async (request) => {
-    const { id } = request.params as { id: string };
+    const { id } = parseIdParam(request.params);
     const notification = await app.prisma.notification.findFirst({
       where: { id, userId: request.userId },
     });

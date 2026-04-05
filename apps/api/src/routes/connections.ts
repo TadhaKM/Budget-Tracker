@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import crypto from 'node:crypto';
 import { z } from 'zod';
 import { AppError } from '../lib/errors.js';
+import { parseIdParam } from '../lib/params.js';
 import { encrypt } from '../lib/crypto.js';
 import { getBankingProvider } from '../services/truelayer.js';
 import { syncAccountQueue } from '../jobs/queues.js';
@@ -94,7 +95,7 @@ export async function connectionRoutes(app: FastifyInstance) {
 
   // GET /connections/:id — connection detail with accounts
   app.get('/:id', async (request) => {
-    const { id } = request.params as { id: string };
+    const { id } = parseIdParam(request.params);
     const connection = await app.prisma.connectedInstitution.findFirst({
       where: { id, userId: request.userId },
       include: {
@@ -137,7 +138,7 @@ export async function connectionRoutes(app: FastifyInstance) {
 
   // DELETE /connections/:id — disconnect a bank
   app.delete('/:id', async (request) => {
-    const { id } = request.params as { id: string };
+    const { id } = parseIdParam(request.params);
 
     const connection = await app.prisma.connectedInstitution.findFirst({
       where: { id, userId: request.userId },
@@ -169,7 +170,7 @@ export async function connectionRoutes(app: FastifyInstance) {
 
   // POST /connections/:id/refresh — trigger consent re-auth
   app.post('/:id/refresh', async (request) => {
-    const { id } = request.params as { id: string };
+    const { id } = parseIdParam(request.params);
     const connection = await app.prisma.connectedInstitution.findFirst({
       where: { id, userId: request.userId },
       include: { institution: true },

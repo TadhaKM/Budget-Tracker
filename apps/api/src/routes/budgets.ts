@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { CreateBudgetSchema, UpdateBudgetSchema } from '@clearmoney/shared';
 import { notFound } from '../lib/errors.js';
+import { parseIdParam } from '../lib/params.js';
 
 export async function budgetRoutes(app: FastifyInstance) {
   app.addHook('preHandler', app.authenticate);
@@ -25,7 +26,7 @@ export async function budgetRoutes(app: FastifyInstance) {
 
   // GET /budgets/:id — single budget detail
   app.get('/:id', async (request) => {
-    const { id } = request.params as { id: string };
+    const { id } = parseIdParam(request.params);
     const budget = await app.prisma.budget.findUnique({ where: { id } });
     if (!budget || budget.userId !== request.userId) throw notFound('Budget not found');
     return { data: budget };
@@ -33,7 +34,7 @@ export async function budgetRoutes(app: FastifyInstance) {
 
   // PATCH /budgets/:id — update a budget
   app.patch('/:id', async (request) => {
-    const { id } = request.params as { id: string };
+    const { id } = parseIdParam(request.params);
     const existing = await app.prisma.budget.findUnique({ where: { id } });
     if (!existing || existing.userId !== request.userId) throw notFound('Budget not found');
 
@@ -44,7 +45,7 @@ export async function budgetRoutes(app: FastifyInstance) {
 
   // DELETE /budgets/:id — deactivate a budget (soft delete)
   app.delete('/:id', async (request) => {
-    const { id } = request.params as { id: string };
+    const { id } = parseIdParam(request.params);
     const existing = await app.prisma.budget.findUnique({ where: { id } });
     if (!existing || existing.userId !== request.userId) throw notFound('Budget not found');
 
@@ -57,7 +58,7 @@ export async function budgetRoutes(app: FastifyInstance) {
 
   // GET /budgets/:id/history — budget performance snapshots
   app.get('/:id/history', async (request) => {
-    const { id } = request.params as { id: string };
+    const { id } = parseIdParam(request.params);
     const budget = await app.prisma.budget.findUnique({ where: { id } });
     if (!budget || budget.userId !== request.userId) throw notFound('Budget not found');
 

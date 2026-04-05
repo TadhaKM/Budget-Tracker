@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { AppError } from '../lib/errors.js';
+import { parseIdParam } from '../lib/params.js';
 
 const categoryEnum = z.enum([
   'GROCERIES', 'DINING', 'TRANSPORT', 'ENTERTAINMENT', 'SHOPPING',
@@ -75,7 +76,7 @@ export async function transactionRoutes(app: FastifyInstance) {
 
   // GET /transactions/:id — single transaction detail
   app.get('/:id', async (request) => {
-    const { id } = request.params as { id: string };
+    const { id } = parseIdParam(request.params);
     const transaction = await app.prisma.transaction.findFirst({
       where: { id, userId: request.userId },
       include: {
@@ -89,7 +90,7 @@ export async function transactionRoutes(app: FastifyInstance) {
 
   // PATCH /transactions/:id — re-categorise
   app.patch('/:id', async (request) => {
-    const { id } = request.params as { id: string };
+    const { id } = parseIdParam(request.params);
     const { categoryId } = UpdateCategorySchema.parse(request.body);
 
     // Verify ownership
